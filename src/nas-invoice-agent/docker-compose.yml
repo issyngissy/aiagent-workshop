@@ -1,0 +1,16 @@
+services:
+  invoice-agent:
+    build: .
+    container_name: invoice-agent
+    restart: unless-stopped
+    env_file: .env
+    # Run as your NAS user so the spreadsheet is owned by you, not root.
+    # Find your IDs with `id` over SSH. Synology admin is often 1026:100.
+    user: "${PUID:-1000}:${PGID:-1000}"
+    volumes:
+      # Left side: real NAS folders. Right side: where the agent sees them.
+      # Scan folders are read-only: the agent never modifies your PDFs.
+      - /volume1/Documents/Invoices:/scan/invoices:ro
+      - /volume1/Documents/Receipts:/scan/receipts:ro
+      - /volume1/Documents/Accounts:/output
+      - ./data:/data
